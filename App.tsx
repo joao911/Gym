@@ -4,6 +4,7 @@ import {useFonts, Roboto_400Regular, Roboto_700Bold} from '@expo-google-fonts/ro
 import { NativeBaseProvider, extendTheme } from 'native-base';
 import Loading from '@components/Loading';
 import SignIn from '@screens/SignIn';
+import SignUp from '@screens/SignUp';
 
 
 
@@ -59,7 +60,7 @@ export default function App() {
       <StatusBar barStyle={"light-content"} backgroundColor="transparent" translucent/>
       {
         fontsLoaded? (
-          <SignIn/>
+          <SignUp/>
 
         ):(<Loading/>)
       }
