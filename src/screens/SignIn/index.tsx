@@ -4,22 +4,25 @@ import BackGround from "@assets/background.png";
 import Logo from "@assets/logo.svg";
 import Input from "@components/Input";
 import Button from "@components/Button";
+import { useNavigation } from "@react-navigation/native";
+import { AuthNavigationProps } from "@routes/auth.routes";
 
 const SignIn: React.FC = () => {
-  const emailRef = useRef<any>(null);
   const passwordRef = useRef<any>(null);
 
+  const navigation = useNavigation<AuthNavigationProps>();
   const handleInput2Submit = () => {
     // Lide com a submissão do segundo input aqui.
   };
   return (
     <ScrollView contentContainerStyle={{ flexGrow: 1 }} showsVerticalScrollIndicator={false}>
-      <VStack flex={1} bg="gray.700" px={10} pb={16}>
+      <VStack flex={1}  px={10} pb={16}>
         <Image
           source={BackGround}
           alt="Pessoas treinando"
           resizeMode="contain"
           position={"absolute"}
+          defaultSource={BackGround}
         />
         <Center my={24}>
           <Logo />
@@ -53,7 +56,7 @@ const SignIn: React.FC = () => {
           <Text color="gray.100" fontSize={"sm"} mb={3} fontFamily={"body"}>
             Ainda não tem acesso?
           </Text>
-            <Button title="Acessar" variant="outline" />
+            <Button title="Criar conta" variant="outline"  onPress={() => navigation.navigate("SignUp")}/>
         </Center>
       </VStack>
     </ScrollView>

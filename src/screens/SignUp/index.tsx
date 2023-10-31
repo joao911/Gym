@@ -4,6 +4,7 @@ import BackGround from "@assets/background.png";
 import Logo from "@assets/logo.svg";
 import Input from "@components/Input";
 import Button from "@components/Button";
+import { useNavigation } from "@react-navigation/native";
 
 const SignUp: React.FC = () => {
   const nameRef = useRef<any>(null);
@@ -11,18 +12,23 @@ const SignUp: React.FC = () => {
   const passwordRef = useRef<any>(null);
   const confirmPasswordRef = useRef<any>(null);
 
+  const navigation = useNavigation();
 
   const handleInput2Submit = () => {
     // Lide com a submissão do segundo input aqui.
   };
   return (
-    <ScrollView contentContainerStyle={{ flexGrow: 1 }} showsVerticalScrollIndicator={false}>
-      <VStack flex={1} bg="gray.700" px={10} pb={16}>
+    <ScrollView
+      contentContainerStyle={{ flexGrow: 1 }}
+      showsVerticalScrollIndicator={false}
+    >
+      <VStack flex={1} px={10} pb={16}>
         <Image
           source={BackGround}
           alt="Pessoas treinando"
           resizeMode="contain"
           position={"absolute"}
+          defaultSource={BackGround}
         />
         <Center my={24}>
           <Logo />
@@ -68,8 +74,11 @@ const SignUp: React.FC = () => {
           <Button title="Criar e acessar " mt={"1.5"} />
         </Center>
         <Center mt={24}>
-          
-            <Button title="Voltar para login" variant="outline" />
+          <Button
+            title="Voltar para login"
+            variant="outline"
+            onPress={() => navigation.goBack()}
+          />
         </Center>
       </VStack>
     </ScrollView>
