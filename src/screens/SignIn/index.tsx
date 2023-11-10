@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import React, { useRef, useState } from "react";
 import { VStack, Image, Text, Center, Heading, ScrollView } from "native-base";
 import { Controller, useForm } from "react-hook-form";
 import * as yup from "yup";
@@ -18,7 +18,7 @@ interface IDataProps {
 
 const SignIn: React.FC = () => {
   const passwordRef = useRef<any>(null);
-
+  const [showPassword, setShowPassword] = useState(true);
   const navigation = useNavigation<AuthNavigationProps>();
 
   const schema = yup.object({
@@ -86,13 +86,16 @@ const SignIn: React.FC = () => {
             render={({ field: { onChange, value } }) => (
               <Input
                 placeholder="Senha"
-                secureTextEntry
+                secureTextEntry={showPassword}
                 ref={passwordRef}
                 returnKeyType="done"
                 // onSubmitEditing={onSubmit}
                 onChangeText={onChange}
                 value={value}
                 errorMessage={errors.password?.message}
+                showPassword={showPassword}
+                setShowPassword={setShowPassword}
+                useIcon
               />
             )}
           />

@@ -1,23 +1,58 @@
-import React, { useRef } from "react";
+import React, { useRef, useState } from "react";
 import { VStack, Image, Text, Center, Heading, ScrollView } from "native-base";
+import { useNavigation } from "@react-navigation/native";
+import { Controller, useForm } from "react-hook-form";
+import * as yup from "yup";
+import { yupResolver } from "@hookform/resolvers/yup";
+
 import BackGround from "@assets/background.png";
 import Logo from "@assets/logo.svg";
 import Input from "@components/Input";
 import Button from "@components/Button";
-import { useNavigation } from "@react-navigation/native";
-import { Controller, useForm } from "react-hook-form";
+
+interface IDataProps {
+  name: string;
+  email: string;
+  password: string;
+  confirmPassword: string;
+}
 
 const SignUp: React.FC = () => {
-  const nameRef = useRef<any>(null);
+  const [showPassword, setShowPassword] = useState(true);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(true);
+
   const emailRef = useRef<any>(null);
   const passwordRef = useRef<any>(null);
   const confirmPasswordRef = useRef<any>(null);
 
   const navigation = useNavigation();
 
-  const { control } = useForm();
-  const handleInput2Submit = () => {
-    // Lide com a submissão do segundo input aqui.
+  const schema = yup.object({
+    name: yup.string().required("Nome é obrigatório"),
+    email: yup.string().required("Email obrigatório").email("Email inválido"),
+    password: yup
+      .string()
+      .required("Digite sua senha")
+      .matches(
+        /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$/,
+        "Deve conter 8 caracteres, uma maiúscula, uma minúscula, um número e um caractere especial"
+      ),
+    confirmPassword: yup
+      .string()
+      .required("Confirme a nova senha")
+      .oneOf([yup.ref("password"), null], "As senhas não correspondem"),
+  });
+
+  const {
+    control,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<IDataProps>({
+    resolver: yupResolver(schema),
+  });
+
+  const onSubmit = (data: IDataProps) => {
+    console.log("data", data);
   };
   return (
     <ScrollView
@@ -54,11 +89,10 @@ const SignUp: React.FC = () => {
                 }}
                 onChangeText={onChange}
                 value={value}
-                marginBottom={0}
+                errorMessage={errors.name?.message}
               />
             )}
           />
-
           <Controller
             name="email"
             control={control}
@@ -74,7 +108,7 @@ const SignUp: React.FC = () => {
                 }}
                 onChangeText={onChange}
                 value={value}
-                marginBottom={10}
+                errorMessage={errors.email?.message}
               />
             )}
           />
@@ -89,13 +123,18 @@ const SignUp: React.FC = () => {
                 ref={passwordRef}
                 returnKeyType="done"
                 onSubmitEditing={confirmPasswordRef?.current?.focus()}
-                onChange={onChange}
+                onChangeText={onChange}
                 value={value}
+                errorMessage={errors.password?.message}
+                showPassword={showPassword}
+                setShowPassword={setShowPassword}
+                useIcon
               />
             )}
           />
+
           <Controller
-            name="password"
+            name="confirmPassword"
             control={control}
             render={({ field: { onChange, value } }) => (
               <Input
@@ -103,14 +142,22 @@ const SignUp: React.FC = () => {
                 secureTextEntry
                 ref={confirmPasswordRef}
                 returnKeyType="done"
-                onSubmitEditing={handleInput2Submit}
-                onChange={onChange}
+                onSubmitEditing={handleSubmit(onSubmit)}
+                onChangeText={onChange}
                 value={value}
+                errorMessage={errors.confirmPassword?.message}
+                showPassword={showConfirmPassword}
+                setShowPassword={setShowConfirmPassword}
+                useIcon
               />
             )}
           />
 
-          <Button title="Criar e acessar " mt={"1.5"} />
+          <Button
+            title="Criar e acessar "
+            mt={"1.5"}
+            onPress={handleSubmit(onSubmit)}
+          />
         </Center>
         <Center mt={24}>
           <Button

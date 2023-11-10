@@ -1,5 +1,5 @@
 import React, { useRef, useState } from "react";
-import { Alert, TouchableOpacity } from "react-native";
+import { TouchableOpacity } from "react-native";
 import ScreenHeader from "@components/ScreenHeader";
 import {
   Center,
@@ -8,24 +8,34 @@ import {
   Skeleton,
   Text,
   Heading,
-  useToast,
 } from "native-base";
 import * as ImagePicker from "expo-image-picker";
 import * as FileSystem from "expo-file-system";
+import { Controller, useForm } from "react-hook-form";
+import * as yup from "yup";
+import { yupResolver } from "@hookform/resolvers/yup";
 
 import UserPhoto from "@components/UserPhoto";
 import ForwardInput from "@components/Input";
 import Button from "@components/Button";
 
+interface IDataProps {
+  name: string;
+  oldPassword: string;
+  password: string;
+  confirmPassword: string;
+}
 const Profile: React.FC = () => {
   const [photoIsLoading, setPhotoIsLoading] = useState(false);
   const [photoSelected, setPhotoSelected] = useState(
     "https://github.com/joao911.png"
   );
-  const toast = useToast();
+  const [showOldPassword, setShowOldPassword] = useState(true);
+  const [showNewPassword, setShowNewPassword] = useState(true);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(true);
 
-  const oldPasswordRef = useRef<any>(null);
   const passwordRef = useRef<any>(null);
+  const oldPasswordRef = useRef<any>(null);
   const confirmPasswordRef = useRef<any>(null);
   const PHOTO_SIZE = 33;
 
@@ -46,14 +56,7 @@ const Profile: React.FC = () => {
         const photoInfo = await FileSystem.getInfoAsync(
           photoSelected.assets[0].uri
         );
-
-        if (photoInfo.size / 1024 / 1024 > 5) {
-          return toast.show({
-            title: "Essa imagem e muito grande. Escolha uma menor.",
-            placement: "top",
-            bgColor: "red.500",
-          });
-        }
+        console.log("photoInfo: ", photoInfo.size / 1024 / 1024 > 5);
         setPhotoSelected(photoSelected.assets[0].uri);
       }
     } catch (error) {
@@ -63,9 +66,34 @@ const Profile: React.FC = () => {
     }
   };
 
-  const handleInput2Submit = () => {
-    // Lide com a submissão do segundo input aqui.
+  const schema = yup.object({
+    name: yup.string().required("Nome é obrigatório"),
+    oldPassword: yup.string().required("Senha é obrigatória"),
+    password: yup
+      .string()
+      .required("Digite sua senha")
+      .matches(
+        /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$/,
+        "Deve conter 8 caracteres, uma maiúscula, uma minúscula, um número e um caractere especial"
+      ),
+    confirmPassword: yup
+      .string()
+      .required("Confirme a nova senha")
+      .oneOf([yup.ref("password"), null], "As senhas não correspondem"),
+  });
+
+  const {
+    control,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<IDataProps>({
+    resolver: yupResolver(schema),
+  });
+
+  const onSubmit = (data: IDataProps) => {
+    console.log("data", data);
   };
+
   return (
     <VStack flex={1}>
       <ScreenHeader title="Perfil" />
@@ -97,14 +125,25 @@ const Profile: React.FC = () => {
               Alterar foto
             </Text>
           </TouchableOpacity>
-          <ForwardInput
-            bg="gray.600"
-            placeholder="Nome"
-            returnKeyType="next"
-            onSubmitEditing={() => {
-              passwordRef?.current?.focus();
-            }}
+
+          <Controller
+            name="name"
+            control={control}
+            render={({ field: { onChange, value } }) => (
+              <ForwardInput
+                bg="gray.600"
+                placeholder="Nome"
+                returnKeyType="next"
+                onSubmitEditing={() => {
+                  oldPasswordRef?.current?.focus();
+                }}
+                onChangeText={onChange}
+                value={value}
+                errorMessage={errors.name?.message}
+              />
+            )}
           />
+
           <ForwardInput
             bg="gray.600"
             placeholder="e-mail"
@@ -116,35 +155,74 @@ const Profile: React.FC = () => {
           <Heading color="gray.200" fontSize="md" mb={2}>
             Alterar senha
           </Heading>
-          <ForwardInput
-            bg="gray.600"
-            placeholder="Senha antiga"
-            secureTextEntry
-            returnKeyType="next"
-            ref={oldPasswordRef}
-            onSubmitEditing={() => {
-              passwordRef?.current?.focus();
-            }}
+          <Controller
+            name="oldPassword"
+            control={control}
+            render={({ field: { onChange, value } }) => (
+              <ForwardInput
+                bg="gray.600"
+                placeholder="Senha antiga"
+                returnKeyType="next"
+                ref={oldPasswordRef}
+                onSubmitEditing={() => {
+                  passwordRef?.current?.focus();
+                }}
+                secureTextEntry={showOldPassword}
+                onChangeText={onChange}
+                value={value}
+                errorMessage={errors.oldPassword?.message}
+                showPassword={showOldPassword}
+                setShowPassword={setShowOldPassword}
+                useIcon
+              />
+            )}
           />
-          <ForwardInput
-            bg="gray.600"
-            placeholder="Nova senha"
-            secureTextEntry
-            returnKeyType="next"
-            ref={passwordRef}
-            onSubmitEditing={() => {
-              confirmPasswordRef?.current?.focus();
-            }}
+
+          <Controller
+            name="password"
+            control={control}
+            render={({ field: { onChange, value } }) => (
+              <ForwardInput
+                bg="gray.600"
+                placeholder="Nova senha"
+                returnKeyType="next"
+                ref={passwordRef}
+                onSubmitEditing={() => {
+                  confirmPasswordRef?.current?.focus();
+                }}
+                secureTextEntry={showNewPassword}
+                onChangeText={onChange}
+                value={value}
+                errorMessage={errors.password?.message}
+                showPassword={showNewPassword}
+                setShowPassword={setShowNewPassword}
+                useIcon
+              />
+            )}
           />
-          <ForwardInput
-            bg="gray.600"
-            placeholder="Confirme a nova senha"
-            secureTextEntry
-            returnKeyType="send"
-            ref={confirmPasswordRef}
-            onSubmitEditing={handleInput2Submit}
+
+          <Controller
+            name="confirmPassword"
+            control={control}
+            render={({ field: { onChange, value } }) => (
+              <ForwardInput
+                bg="gray.600"
+                placeholder="Confirme a nova senha"
+                secureTextEntry={showConfirmPassword}
+                returnKeyType="send"
+                ref={confirmPasswordRef}
+                onSubmitEditing={handleSubmit(onSubmit)}
+                onChangeText={onChange}
+                value={value}
+                errorMessage={errors.confirmPassword?.message}
+                showPassword={showConfirmPassword}
+                setShowPassword={setShowConfirmPassword}
+                useIcon
+              />
+            )}
           />
-          <Button title="Atualizar" />
+
+          <Button title="Atualizar" onPress={handleSubmit(onSubmit)} />
         </VStack>
       </ScrollView>
     </VStack>
