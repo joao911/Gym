@@ -11,9 +11,15 @@ const HistoryCard: React.FC = () => {
       bg="gray.600"
       alignItems="center"
       justifyContent="space-between"
+      rounded="md"
     >
-      <VStack>
-        <Heading color="white" fontSize="md" textTransform="capitalize">
+      <VStack flex={1}>
+        <Heading
+          color="white"
+          fontSize="md"
+          textTransform="capitalize"
+          numberOfLines={1}
+        >
           Costas
         </Heading>
         <Text color="gray.100" fontSize="lg" numberOfLines={1}>

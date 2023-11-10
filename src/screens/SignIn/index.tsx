@@ -1,5 +1,6 @@
 import React, { useRef } from "react";
 import { VStack, Image, Text, Center, Heading, ScrollView } from "native-base";
+import { Controller, useForm } from "react-hook-form";
 import BackGround from "@assets/background.png";
 import Logo from "@assets/logo.svg";
 import Input from "@components/Input";
@@ -11,12 +12,17 @@ const SignIn: React.FC = () => {
   const passwordRef = useRef<any>(null);
 
   const navigation = useNavigation<AuthNavigationProps>();
+
+  const { control } = useForm();
   const handleInput2Submit = () => {
     // Lide com a submissão do segundo input aqui.
   };
   return (
-    <ScrollView contentContainerStyle={{ flexGrow: 1 }} showsVerticalScrollIndicator={false}>
-      <VStack flex={1}  px={10} pb={16}>
+    <ScrollView
+      contentContainerStyle={{ flexGrow: 1 }}
+      showsVerticalScrollIndicator={false}
+    >
+      <VStack flex={1} px={10} pb={16}>
         <Image
           source={BackGround}
           alt="Pessoas treinando"
@@ -34,29 +40,52 @@ const SignIn: React.FC = () => {
           <Heading color="gray.100" fontSize="xl" fontFamily={"heading"} mb={6}>
             Acesse sua conta{" "}
           </Heading>
-          <Input
-            placeholder="E-mail"
-            keyboardType="email-address"
-            autoCapitalize="none"
-            returnKeyType="next"
-            onSubmitEditing={() => {
-              passwordRef?.current?.focus();
-            }}
+
+          <Controller
+            name="email"
+            control={control}
+            render={({ field: { onChange, value } }) => (
+              <Input
+                placeholder="E-mail"
+                keyboardType="email-address"
+                autoCapitalize="none"
+                returnKeyType="next"
+                onSubmitEditing={() => {
+                  passwordRef?.current?.focus();
+                }}
+                onChangeText={onChange}
+                value={value}
+              />
+            )}
           />
-          <Input
-            placeholder="Senha"
-            secureTextEntry
-            ref={passwordRef}
-            returnKeyType="done"
-            onSubmitEditing={handleInput2Submit}
+
+          <Controller
+            name="password"
+            control={control}
+            render={({ field: { onChange, value } }) => (
+              <Input
+                placeholder="Senha"
+                secureTextEntry
+                ref={passwordRef}
+                returnKeyType="done"
+                onSubmitEditing={handleInput2Submit}
+                onChangeText={onChange}
+                value={value}
+              />
+            )}
           />
+
           <Button title="Acessar" />
         </Center>
         <Center mt={24}>
           <Text color="gray.100" fontSize={"sm"} mb={3} fontFamily={"body"}>
             Ainda não tem acesso?
           </Text>
-            <Button title="Criar conta" variant="outline"  onPress={() => navigation.navigate("SignUp")}/>
+          <Button
+            title="Criar conta"
+            variant="outline"
+            onPress={() => navigation.navigate("SignUp")}
+          />
         </Center>
       </VStack>
     </ScrollView>
