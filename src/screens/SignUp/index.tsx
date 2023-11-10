@@ -54,6 +54,7 @@ const SignUp: React.FC = () => {
                 }}
                 onChangeText={onChange}
                 value={value}
+                marginBottom={0}
               />
             )}
           />
@@ -73,6 +74,7 @@ const SignUp: React.FC = () => {
                 }}
                 onChangeText={onChange}
                 value={value}
+                marginBottom={10}
               />
             )}
           />

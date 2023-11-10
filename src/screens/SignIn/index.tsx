@@ -1,6 +1,9 @@
 import React, { useRef } from "react";
 import { VStack, Image, Text, Center, Heading, ScrollView } from "native-base";
 import { Controller, useForm } from "react-hook-form";
+import * as yup from "yup";
+import { yupResolver } from "@hookform/resolvers/yup";
+
 import BackGround from "@assets/background.png";
 import Logo from "@assets/logo.svg";
 import Input from "@components/Input";
@@ -8,14 +11,31 @@ import Button from "@components/Button";
 import { useNavigation } from "@react-navigation/native";
 import { AuthNavigationProps } from "@routes/auth.routes";
 
+interface IDataProps {
+  email: string;
+  password: string;
+}
+
 const SignIn: React.FC = () => {
   const passwordRef = useRef<any>(null);
 
   const navigation = useNavigation<AuthNavigationProps>();
 
-  const { control } = useForm();
-  const handleInput2Submit = () => {
-    // Lide com a submissão do segundo input aqui.
+  const schema = yup.object({
+    email: yup.string().required("Email obrigatório").email("Email inválido"),
+    password: yup.string().required("Senha obrigatória"),
+  });
+
+  const {
+    control,
+    handleSubmit,
+    formState: { errors },
+  } = useForm({
+    resolver: yupResolver(schema),
+  });
+
+  const onSubmit = (data: IDataProps) => {
+    console.log("data", data);
   };
   return (
     <ScrollView
@@ -55,6 +75,7 @@ const SignIn: React.FC = () => {
                 }}
                 onChangeText={onChange}
                 value={value}
+                errorMessage={errors.email?.message}
               />
             )}
           />
@@ -68,14 +89,15 @@ const SignIn: React.FC = () => {
                 secureTextEntry
                 ref={passwordRef}
                 returnKeyType="done"
-                onSubmitEditing={handleInput2Submit}
+                // onSubmitEditing={onSubmit}
                 onChangeText={onChange}
                 value={value}
+                errorMessage={errors.password?.message}
               />
             )}
           />
 
-          <Button title="Acessar" />
+          <Button title="Acessar" onPress={handleSubmit(onSubmit)} />
         </Center>
         <Center mt={24}>
           <Text color="gray.100" fontSize={"sm"} mb={3} fontFamily={"body"}>
