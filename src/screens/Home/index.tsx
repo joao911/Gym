@@ -55,7 +55,9 @@ const Home: React.FC = () => {
       />
       <VStack flex={1} px={8}>
         <HStack justifyContent={"space-between"} mb={5}>
-          <Heading color="gray.200">Exercícios</Heading>
+          <Heading color="gray.200" fontFamily={"heading"}>
+            Exercícios
+          </Heading>
           <Text color="gray.200">{exercises.length}</Text>
         </HStack>
 

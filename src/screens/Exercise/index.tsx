@@ -37,7 +37,7 @@ const Exercise: React.FC = () => {
           mt={4}
           mb={8}
         >
-          <Heading color="gray.100" fontSize="lg">
+          <Heading color="gray.100" fontSize="lg" fontFamily={"heading"}>
             Puxada frontal
           </Heading>
           <HStack alignItems={"center"}>

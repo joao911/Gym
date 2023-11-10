@@ -19,6 +19,7 @@ const HistoryCard: React.FC = () => {
           fontSize="md"
           textTransform="capitalize"
           numberOfLines={1}
+          fontFamily={"heading"}
         >
           Costas
         </Heading>
