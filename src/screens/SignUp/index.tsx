@@ -1,14 +1,24 @@
 import React, { useRef, useState } from "react";
-import { VStack, Image, Text, Center, Heading, ScrollView } from "native-base";
+import {
+  VStack,
+  Image,
+  Text,
+  Center,
+  Heading,
+  ScrollView,
+  useToast,
+} from "native-base";
 import { useNavigation } from "@react-navigation/native";
 import { Controller, useForm } from "react-hook-form";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
-
+import axios from "axios";
 import BackGround from "@assets/background.png";
 import Logo from "@assets/logo.svg";
 import Input from "@components/Input";
 import Button from "@components/Button";
+import { api } from "@services/api";
+import { AppError } from "@utils/AppError";
 
 interface IDataProps {
   name: string;
@@ -24,7 +34,7 @@ const SignUp: React.FC = () => {
   const emailRef = useRef<any>(null);
   const passwordRef = useRef<any>(null);
   const confirmPasswordRef = useRef<any>(null);
-
+  const toast = useToast();
   const navigation = useNavigation();
 
   const schema = yup.object({
@@ -51,8 +61,25 @@ const SignUp: React.FC = () => {
     resolver: yupResolver(schema),
   });
 
-  const onSubmit = (data: IDataProps) => {
-    console.log("data", data);
+  const onSubmit = async ({ name, email, password }: IDataProps) => {
+    try {
+      const response = await api.post("/users", {
+        name,
+        email,
+        password,
+      });
+      console.log("response: ", response.data);
+    } catch (error) {
+      const isAppError = error instanceof AppError;
+      const title = isAppError
+        ? error.message
+        : "Não foi possivel criar a conta. Tente novamente mais tarde";
+      toast.show({
+        title,
+        placement: "top",
+        bgColor: "red.500",
+      });
+    }
   };
   return (
     <ScrollView
@@ -118,11 +145,13 @@ const SignUp: React.FC = () => {
             control={control}
             render={({ field: { onChange, value } }) => (
               <Input
-                placeholder="Senha"
-                secureTextEntry
-                ref={passwordRef}
-                returnKeyType="done"
-                onSubmitEditing={confirmPasswordRef?.current?.focus()}
+                placeholder="Confirmar senha"
+                secureTextEntry={showPassword}
+                ref={confirmPasswordRef}
+                onSubmitEditing={() => {
+                  confirmPasswordRef?.current?.focus();
+                }}
+                returnKeyType="next"
                 onChangeText={onChange}
                 value={value}
                 errorMessage={errors.password?.message}
@@ -139,7 +168,7 @@ const SignUp: React.FC = () => {
             render={({ field: { onChange, value } }) => (
               <Input
                 placeholder="Confirmar senha"
-                secureTextEntry
+                secureTextEntry={showConfirmPassword}
                 ref={confirmPasswordRef}
                 returnKeyType="done"
                 onSubmitEditing={handleSubmit(onSubmit)}
