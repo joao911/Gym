@@ -1,15 +1,25 @@
 import React, { useRef, useState } from "react";
-import { VStack, Image, Text, Center, Heading, ScrollView } from "native-base";
+import {
+  VStack,
+  Image,
+  Text,
+  Center,
+  Heading,
+  ScrollView,
+  useToast,
+} from "native-base";
 import { Controller, useForm } from "react-hook-form";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
+import { useNavigation } from "@react-navigation/native";
 
 import BackGround from "@assets/background.png";
 import Logo from "@assets/logo.svg";
 import Input from "@components/Input";
 import Button from "@components/Button";
-import { useNavigation } from "@react-navigation/native";
 import { AuthNavigationProps } from "@routes/auth.routes";
+import { useAuth } from "@hooks/useAuth";
+import { AppError } from "@utils/AppError";
 
 interface IDataProps {
   email: string;
@@ -19,7 +29,10 @@ interface IDataProps {
 const SignIn: React.FC = () => {
   const passwordRef = useRef<any>(null);
   const [showPassword, setShowPassword] = useState(true);
+  const [loading, setLoading] = useState(false);
   const navigation = useNavigation<AuthNavigationProps>();
+  const toast = useToast();
+  const { sigIn } = useAuth();
 
   const schema = yup.object({
     email: yup.string().required("Email obrigatório").email("Email inválido"),
@@ -29,13 +42,30 @@ const SignIn: React.FC = () => {
   const {
     control,
     handleSubmit,
+    reset,
     formState: { errors },
   } = useForm({
     resolver: yupResolver(schema),
   });
 
-  const onSubmit = (data: IDataProps) => {
-    console.log("data", data);
+  const onSubmit = async ({ email, password }: IDataProps) => {
+    try {
+      setLoading(true);
+      await sigIn(email, password);
+      reset();
+      setLoading(false);
+    } catch (error) {
+      const isAppError = error instanceof AppError;
+      setLoading(false);
+      const title = isAppError
+        ? error.message
+        : "Não foi possivel entrar. Tente novamente mais tarde";
+      toast.show({
+        title,
+        placement: "top",
+        bgColor: "red.500",
+      });
+    }
   };
   return (
     <ScrollView
@@ -89,7 +119,7 @@ const SignIn: React.FC = () => {
                 secureTextEntry={showPassword}
                 ref={passwordRef}
                 returnKeyType="done"
-                // onSubmitEditing={onSubmit}
+                onSubmitEditing={handleSubmit(onSubmit)}
                 onChangeText={onChange}
                 value={value}
                 errorMessage={errors.password?.message}
@@ -100,7 +130,11 @@ const SignIn: React.FC = () => {
             )}
           />
 
-          <Button title="Acessar" onPress={handleSubmit(onSubmit)} />
+          <Button
+            title="Acessar"
+            onPress={handleSubmit(onSubmit)}
+            isLoading={loading}
+          />
         </Center>
         <Center mt={24}>
           <Text color="gray.100" fontSize={"sm"} mb={3} fontFamily={"body"}>

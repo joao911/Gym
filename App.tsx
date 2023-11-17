@@ -15,6 +15,7 @@ import Loading from "@components/Loading";
 import SignIn from "@screens/SignIn";
 import SignUp from "@screens/SignUp";
 import { Routes } from "@routes/index";
+import { AuthContext, AuthContextProvider } from "@contexts/AuthContext";
 
 export const THEME = extendTheme({
   colors: {
@@ -66,7 +67,9 @@ export default function App() {
         backgroundColor="transparent"
         translucent
       />
-      {fontsLoaded ? <Routes /> : <Loading />}
+      <AuthContextProvider>
+        {fontsLoaded ? <Routes /> : <Loading />}
+      </AuthContextProvider>
     </NativeBaseProvider>
   );
 }
