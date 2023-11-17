@@ -56,10 +56,13 @@ export const AuthContextProvider = ({ children }: AuthContextProviderProps) => {
 
   const signOut = async () => {
     try {
+      setLoadingStorageData(true);
       setUser({} as UserDto);
       await storageUserRemove();
     } catch (error) {
       throw error;
+    } finally {
+      setLoadingStorageData(false);
     }
   };
 

@@ -12,13 +12,14 @@ import { useNavigation } from "@react-navigation/native";
 import { Controller, useForm } from "react-hook-form";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
-import axios from "axios";
+
 import BackGround from "@assets/background.png";
 import Logo from "@assets/logo.svg";
 import Input from "@components/Input";
 import Button from "@components/Button";
 import { api } from "@services/api";
 import { AppError } from "@utils/AppError";
+import { useAuth } from "@hooks/useAuth";
 
 interface IDataProps {
   name: string;
@@ -30,6 +31,9 @@ interface IDataProps {
 const SignUp: React.FC = () => {
   const [showPassword, setShowPassword] = useState(true);
   const [showConfirmPassword, setShowConfirmPassword] = useState(true);
+  const [loading, setLoading] = useState(false);
+
+  const { sigIn } = useAuth();
 
   const emailRef = useRef<any>(null);
   const passwordRef = useRef<any>(null);
@@ -63,12 +67,14 @@ const SignUp: React.FC = () => {
 
   const onSubmit = async ({ name, email, password }: IDataProps) => {
     try {
+      setLoading(true);
       const response = await api.post("/users", {
         name,
         email,
         password,
       });
-      console.log("response: ", response.data);
+      sigIn(email, password);
+      setLoading(false);
     } catch (error) {
       const isAppError = error instanceof AppError;
       const title = isAppError
@@ -79,6 +85,8 @@ const SignUp: React.FC = () => {
         placement: "top",
         bgColor: "red.500",
       });
+    } finally {
+      setLoading(false);
     }
   };
   return (
@@ -186,6 +194,7 @@ const SignUp: React.FC = () => {
             title="Criar e acessar "
             mt={"1.5"}
             onPress={handleSubmit(onSubmit)}
+            isLoading={loading}
           />
         </Center>
         <Center mt={24}>
