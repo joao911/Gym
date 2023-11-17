@@ -1,6 +1,10 @@
 import { ReactNode, createContext, useEffect, useState } from "react";
 
-import { storageUserGet, storageUserSave } from "@storage/storageUser";
+import {
+  storageUserGet,
+  storageUserRemove,
+  storageUserSave,
+} from "@storage/storageUser";
 import { UserDto } from "@dtos/UserDto";
 import { api } from "@services/api";
 
@@ -8,6 +12,7 @@ export interface AuthContextDataProps {
   user: UserDto;
   sigIn: (email: string, password: string) => Promise<void>;
   loadingStorageData: boolean;
+  signOut: () => Promise<void>;
 }
 
 export const AuthContext = createContext<AuthContextDataProps>(
@@ -49,6 +54,15 @@ export const AuthContextProvider = ({ children }: AuthContextProviderProps) => {
     }
   };
 
+  const signOut = async () => {
+    try {
+      setUser({} as UserDto);
+      await storageUserRemove();
+    } catch (error) {
+      throw error;
+    }
+  };
+
   useEffect(() => {
     loadUserData();
   }, []);
@@ -59,6 +73,7 @@ export const AuthContextProvider = ({ children }: AuthContextProviderProps) => {
         user,
         sigIn,
         loadingStorageData,
+        signOut,
       }}
     >
       {children}

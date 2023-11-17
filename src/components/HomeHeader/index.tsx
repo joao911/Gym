@@ -1,14 +1,17 @@
 import React from "react";
 import { HStack, VStack, Text, Heading, Icon } from "native-base";
-import UserPhoto from "@components/UserPhoto";
 import { MaterialIcons } from "@expo/vector-icons";
 import { TouchableOpacity } from "react-native";
+import photoDefault from "@assets/userPhotoDefault.png";
+import UserPhoto from "@components/UserPhoto";
+import { useAuth } from "@hooks/useAuth";
 
 const HomeHeader: React.FC = () => {
+  const { user, signOut } = useAuth();
   return (
     <HStack bgColor="gray.600" pt={16} pb={5} px={8} alignItems={"center"}>
       <UserPhoto
-        source={{ uri: "https://github.com/joao911.png" }}
+        source={user.avatar ? { uri: user.avatar } : photoDefault}
         size={16}
         alt="Imagem do perfil"
         mr={4}
@@ -18,10 +21,10 @@ const HomeHeader: React.FC = () => {
           Ola
         </Text>
         <Heading color="gray.100" fontSize="md" fontFamily={"heading"}>
-          João
+          {user.name}
         </Heading>
       </VStack>
-      <TouchableOpacity>
+      <TouchableOpacity onPress={signOut}>
         <Icon as={MaterialIcons} name="logout" color="gray.200" size={7} />
       </TouchableOpacity>
     </HStack>
