@@ -7,6 +7,11 @@ import {
 } from "@storage/storageUser";
 import { UserDto } from "@dtos/UserDto";
 import { api } from "@services/api";
+import {
+  storageTokenGet,
+  storageTokenRemove,
+  storageTokenSave,
+} from "@storage/storageAuthToken";
 
 export interface AuthContextDataProps {
   user: UserDto;
@@ -26,26 +31,48 @@ export const AuthContextProvider = ({ children }: AuthContextProviderProps) => {
   const [user, setUser] = useState<UserDto>({} as UserDto);
   const [loadingStorageData, setLoadingStorageData] = useState(true);
 
+  const storageUserAndTokenUpdate = async (user: UserDto, token: string) => {
+    api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+
+    setUser(user);
+  };
+
+  const storageUserAndTokenSave = async (user: UserDto, token: string) => {
+    try {
+      setLoadingStorageData(true);
+      await storageUserSave(user);
+      await storageTokenSave(token);
+    } catch (error) {
+      throw error;
+    } finally {
+      setLoadingStorageData(false);
+    }
+  };
   const sigIn = async (email: string, password: string) => {
     try {
       const { data } = await api.post("/sessions", {
         email,
         password,
       });
-      if (data.user) {
-        setUser(data.user);
-        storageUserSave(data.user);
+      if (data.user && data.token) {
+        setLoadingStorageData(true);
+        await storageUserAndTokenSave(data.user, data.token);
+        await storageUserAndTokenUpdate(data.user, data.token);
       }
     } catch (error) {
       throw error;
+    } finally {
+      setLoadingStorageData(false);
     }
   };
 
   const loadUserData = async () => {
     try {
+      setLoadingStorageData(true);
       const userLogged = await storageUserGet();
-      if (userLogged) {
-        setUser(userLogged);
+      const token = await storageTokenGet();
+      if (userLogged && token) {
+        storageUserAndTokenUpdate(userLogged, token);
       }
     } catch (error) {
       throw error;
@@ -59,6 +86,7 @@ export const AuthContextProvider = ({ children }: AuthContextProviderProps) => {
       setLoadingStorageData(true);
       setUser({} as UserDto);
       await storageUserRemove();
+      await storageTokenRemove();
     } catch (error) {
       throw error;
     } finally {
