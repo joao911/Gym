@@ -17,10 +17,10 @@ const Home: React.FC = () => {
 
   const [exercises, setExercises] = useState<ExerciseDto[]>([]);
   const [groups, setGroups] = useState([]);
-  const [groupSelected, setGroupSelected] = useState("Costas");
+  const [groupSelected, setGroupSelected] = useState("Antebraço");
   const [isLoading, setIsLoading] = useState(true);
-  const handleOpenExerciseDetails = () => {
-    navigation.navigate("Exercise");
+  const handleOpenExerciseDetails = (id: string) => {
+    navigation.navigate("Exercise", { exerciseId: id });
   };
 
   const fetchGroups = async () => {
@@ -109,7 +109,10 @@ const Home: React.FC = () => {
             data={exercises}
             keyExtractor={(item) => item.id}
             renderItem={({ item }) => (
-              <ExerciseCard item={item} onPress={handleOpenExerciseDetails} />
+              <ExerciseCard
+                item={item}
+                onPress={() => handleOpenExerciseDetails(item.id)}
+              />
             )}
             showsVerticalScrollIndicator={false}
             _contentContainerStyle={{ paddingBottom: 20 }}
