@@ -13,8 +13,6 @@ export const Routes = () => {
 
   theme.colors.background = colors.gray[700];
 
-  console.log("usuario logado", user);
-
   if (loadingStorageData) {
     return <Loading />;
   }

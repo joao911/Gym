@@ -155,7 +155,7 @@ const SignUp: React.FC = () => {
               <Input
                 placeholder="Confirmar senha"
                 secureTextEntry={showPassword}
-                ref={confirmPasswordRef}
+                ref={passwordRef}
                 onSubmitEditing={() => {
                   confirmPasswordRef?.current?.focus();
                 }}

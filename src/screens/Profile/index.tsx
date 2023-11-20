@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { TouchableOpacity } from "react-native";
 import ScreenHeader from "@components/ScreenHeader";
 import {
@@ -8,6 +8,7 @@ import {
   Skeleton,
   Text,
   Heading,
+  useToast,
 } from "native-base";
 import * as ImagePicker from "expo-image-picker";
 import * as FileSystem from "expo-file-system";
@@ -18,6 +19,9 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import UserPhoto from "@components/UserPhoto";
 import ForwardInput from "@components/Input";
 import Button from "@components/Button";
+import { useAuth } from "@hooks/useAuth";
+import { AppError } from "@utils/AppError";
+import { api } from "@services/api";
 
 interface IDataProps {
   name: string;
@@ -26,6 +30,8 @@ interface IDataProps {
   confirmPassword: string;
 }
 const Profile: React.FC = () => {
+  const { user, updateUserProfile } = useAuth();
+  const toast = useToast();
   const [photoIsLoading, setPhotoIsLoading] = useState(false);
   const [photoSelected, setPhotoSelected] = useState(
     "https://github.com/joao911.png"
@@ -33,6 +39,8 @@ const Profile: React.FC = () => {
   const [showOldPassword, setShowOldPassword] = useState(true);
   const [showNewPassword, setShowNewPassword] = useState(true);
   const [showConfirmPassword, setShowConfirmPassword] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
+  const [userName, setUserName] = useState(user.name);
 
   const passwordRef = useRef<any>(null);
   const oldPasswordRef = useRef<any>(null);
@@ -66,33 +74,96 @@ const Profile: React.FC = () => {
     }
   };
 
-  const schema = yup.object({
+  const profileSchema = yup.object({
     name: yup.string().required("Nome é obrigatório"),
-    oldPassword: yup.string().required("Senha é obrigatória"),
+    oldPassword: yup.string().when("password", {
+      is: (value: any) => !!value,
+      then: (schema) => schema.required("Senha antiga é obrigatória"),
+      otherwise: (schema) => schema.notRequired(),
+    }),
     password: yup
       .string()
-      .required("Digite sua senha")
+      .nullable()
+      .transform((value) => (!!value ? value : null))
       .matches(
         /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$/,
         "Deve conter 8 caracteres, uma maiúscula, uma minúscula, um número e um caractere especial"
       ),
     confirmPassword: yup
       .string()
-      .required("Confirme a nova senha")
+      .nullable()
+      .transform((value) => (!!value ? value : null))
+      .when("password", {
+        is: (value: any) => !!value,
+        then: (schema) =>
+          schema
+            .required("Confirme a nova senha")
+            .nullable()
+            .transform((value) => (!!value ? value : null)),
+        otherwise: (schema) => schema.notRequired(),
+      })
       .oneOf([yup.ref("password"), null], "As senhas não correspondem"),
   });
+
+  const initialValues = {
+    name: userName.length > 0 ? userName : user?.name,
+    oldPassword: "",
+    password: "",
+    confirmPassword: "",
+  };
 
   const {
     control,
     handleSubmit,
+    watch,
+    reset,
     formState: { errors },
   } = useForm<IDataProps>({
-    resolver: yupResolver(schema),
+    resolver: yupResolver(profileSchema),
+    defaultValues: initialValues,
   });
 
-  const onSubmit = (data: IDataProps) => {
-    console.log("data", data);
+  const handleProfileUpdate = async (data: IDataProps) => {
+    try {
+      setIsLoading(true);
+      await api.put("/users", {
+        name: data.name,
+        password: data.password,
+        old_password: data.oldPassword,
+      });
+
+      const userUpdated = user;
+      userUpdated.name = data.name;
+      await updateUserProfile(userUpdated);
+      toast.show({
+        title: "Informações alteradas com sucesso",
+        placement: "top",
+        bgColor: "green.500",
+      });
+    } catch (error) {
+      const isAppError = error instanceof AppError;
+      const title = isAppError
+        ? error.message
+        : "Não foi possível carregar os exercícios. Tente mais tarde";
+      toast.show({
+        title,
+        placement: "top",
+        bgColor: "red.500",
+      });
+      reset(initialValues);
+    } finally {
+      setIsLoading(false);
+    }
   };
+
+  const watchNameUser = watch("name", "");
+  const onSubmit = (data: IDataProps) => {
+    handleProfileUpdate(data);
+  };
+
+  useEffect(() => {
+    setUserName(watchNameUser);
+  }, [watchNameUser]);
 
   return (
     <VStack flex={1}>
@@ -148,7 +219,7 @@ const Profile: React.FC = () => {
             bg="gray.600"
             placeholder="e-mail"
             isDisabled
-            value="y7BzK@example.com"
+            value={user?.email}
           />
         </Center>
         <VStack mt={12} mb={9} px={10}>
@@ -222,7 +293,11 @@ const Profile: React.FC = () => {
             )}
           />
 
-          <Button title="Atualizar" onPress={handleSubmit(onSubmit)} />
+          <Button
+            title="Atualizar"
+            onPress={handleSubmit(onSubmit)}
+            isLoading={isLoading}
+          />
         </VStack>
       </ScrollView>
     </VStack>
