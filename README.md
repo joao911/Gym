@@ -1,39 +1,25 @@
-
 # Gym
-Esté é o projeto ignite Gym feito para testar meus conhecimentos em react-native.
-As tecnologias ultilizadas foram: native-base, yup, react-hook-form, react-native-async-storage/async-storage,
-react-navigation/bottom-tabs, react-navigation/native-stack, react-native-svg, react-native-svg,
-Native-base foi ultilizado para reaproveitar os componentes prontos que ele oferece estilizando da forma que achar melhor.
-Yup foi ultilizado junto com o react-hook-form para a validação de formulários.
-react-native-async-storage/async-storage para salvar dados na memoria do celular,
-react-navigation/bottom-tabs para fazer a tab-bottom navigation,
-react-navigation/native-stack para fazer navegação em pilhas foi ultilizado nas screens não logadas,
-react-native-svg para ultilizar fotos com o formato.svg,
-react-native-svg para ultilizar fotos como se fosse um componente do react.
+Este é o projeto Ignite Gym, desenvolvido para testar meus conhecimentos em React Native. As tecnologias utilizadas foram: NativeBase, Yup, React Hook Form, React Native Async Storage, React Navigation Bottom Tabs, React Navigation Native Stack e React Native SVG.
 
-Front-end
-Para rodar o projeto na sua máquina primeiro certifiqui-se de te o set up de react-native na sua máquina,
-Por ser um projeto que o back end está rodando na sua máquina modifique o arquivo que está no seguinte caminho src/services/api.ts.
-Caso esteja ultilizando linux use o camndo ifconfig para saber o endereço ip da sua máquina, se estiver ultilizando windows ultilize o comando ipconfig.
+O NativeBase foi utilizado para reaproveitar os componentes prontos, estilizando-os da forma que considerei melhor.</br> Yup foi empregado junto com o React Hook Form para a validação de formulários.</br> React Native Async Storage foi utilizado para salvar dados na memória do celular.</br> React Navigation Bottom Tabs foi utilizado para criar a navegação de abas na parte inferior.</br> React Navigation Native Stack foi usado nas telas não logadas. </br> React Native SVG foi usado para incorporar imagens no formato .svg e como componente React.
 
-Após saber qual o endereço ip da sua maquina siga o seguinte exemplo pra mudar o ip do projeto para o ip da sua máquina:
+## Front-end
+Para rodar o projeto em sua máquina, certifique-se primeiro de ter o ambiente React Native configurado. Como o backend está rodando localmente, modifique o arquivo localizado em src/services/api.ts. Se estiver utilizando Linux, use o comando `ifconfig` para obter o endereço IP da sua máquina; se estiver utilizando o Windows, use o comando `ipconfig`.
+
+Após identificar o endereço IP da sua máquina, siga o exemplo a seguir para ajustar o projeto para o IP da sua máquina:
+
+
 const api = axios.create({
-  baseURL: "http://endereço de ip da sua máquina:3333",
+  baseURL: "http://endereço-de-ip-da-sua-máquina:3333",
 });
 
-Apos fazer o download do projeto basta usar o comando yarn install para baixar as dependencias do projeto e yarn start para iniciar o projeto na sua máquina.
+Após baixar o projeto, execute o comando `yarn install` para instalar as dependências e `yarn start` para iniciar o projeto em sua máquina.
 
+## Back-end
+O backend utilizado neste projeto foi configurado localmente em minha máquina. Para utilizá-lo, baixe o projeto do seguinte repositório: [https://github.com/rodrigorgtic/ignitegym-api](https://github.com/rodrigorgtic/ignitegym-api). Para instalar as dependências, utilize o comando `yarn install`, e para iniciar o projeto, utilize `yarn dev`.
 
-Back-end 
-O back end ultilizado nesse projeto foi ultilizado de forma local na minha máquina para ultilizar o mesmo deve baixar o projeto do seguinte repositório https://github.com/rodrigorgtic/ignitegym-api, para baixar as dependencias user o comando yarn install e para iniciar o projeto yarn run dev.
+Um diferencial deste projeto foi a acessibilidade implementada nos inputs. Em um projeto normal, para passar de um input para outro, você deve clicar no input. Com acessibilidade, ao clicar no próprio input, o foco passa para o próximo. O hook utilizado para realizar isso foi o `forwardRef`.
 
-O diferencial desse projeto foi a acessiblidade feita nos inputs em um projeto normal para sair de um input para outro você deve clicar no input com acessibilidade através do proprio input ja vai para o próximo. o hook ultilizado para fazer isso foi o fowardRef.
+A próxima funcionalidade que pretendo implementar no projeto será a manipulação de estado global utilizando o Redux Rematch.
 
-
-A próxima feature que irei implementar no projeto vai ser manipulação de estado global ultilizando redux-rematch
-
-link do figma: https://www.figma.com/file/6nbRZUrIu3l4xqTlGiir1u/Ignite-Gym-(Community)?type=design&node-id=37-6&mode=design&t=LIKmIEg6gkPASfLb-0
-
-
-![Screenshot from 2023-11-20 19-36-50](https://github.com/joao911/Gym/assets/49724031/511baafa-702a-4b58-bb89-ac0595bb0796)
-
+Link do Figma: [Ignite Gym (Community)](https://www.figma.com/file/6nbRZUrIu3l4xqTlGiir1u/Ignite-Gym-(Community)?type=design&node-id=37-6&mode=design&t=LIKmIEg6gkPASfLb-0)
