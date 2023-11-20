@@ -17,7 +17,7 @@ const Home: React.FC = () => {
 
   const [exercises, setExercises] = useState<ExerciseDto[]>([]);
   const [groups, setGroups] = useState([]);
-  const [groupSelected, setGroupSelected] = useState("Antebraço");
+  const [groupSelected, setGroupSelected] = useState("antebraço");
   const [isLoading, setIsLoading] = useState(true);
   const handleOpenExerciseDetails = (id: string) => {
     navigation.navigate("Exercise", { exerciseId: id });
@@ -45,6 +45,7 @@ const Home: React.FC = () => {
       setIsLoading(true);
 
       const response = await api.get(`/exercises/bygroup/${groupSelected}`);
+
       setExercises(response.data);
     } catch (error) {
       const isAppError = error instanceof AppError;

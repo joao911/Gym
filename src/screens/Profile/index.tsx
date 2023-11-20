@@ -33,9 +33,6 @@ const Profile: React.FC = () => {
   const { user, updateUserProfile } = useAuth();
   const toast = useToast();
   const [photoIsLoading, setPhotoIsLoading] = useState(false);
-  const [photoSelected, setPhotoSelected] = useState(
-    "https://github.com/joao911.png"
-  );
   const [showOldPassword, setShowOldPassword] = useState(true);
   const [showNewPassword, setShowNewPassword] = useState(true);
   const [showConfirmPassword, setShowConfirmPassword] = useState(true);
@@ -64,8 +61,40 @@ const Profile: React.FC = () => {
         const photoInfo = await FileSystem.getInfoAsync(
           photoSelected.assets[0].uri
         );
-        console.log("photoInfo: ", photoInfo.size / 1024 / 1024 > 5);
-        setPhotoSelected(photoSelected.assets[0].uri);
+
+        const fileExtension = photoInfo.uri.split(".").pop();
+        const photoFile = {
+          name: `${user.name}.${fileExtension}`
+            .toLowerCase()
+            .split(" ")
+            .join(""),
+          uri: photoSelected.assets[0].uri,
+          type: `${photoSelected.assets[0].type}/${fileExtension}`,
+        } as any;
+
+        const userPhotoUploadPhoto = new FormData();
+        userPhotoUploadPhoto.append("avatar", photoFile);
+
+        const response = await api.patch(
+          "/users/avatar",
+          userPhotoUploadPhoto,
+          {
+            headers: {
+              "Content-Type": "multipart/form-data",
+            },
+          }
+        );
+
+        toast.show({
+          title: "Foto alterada com sucesso",
+          placement: "top",
+          bgColor: "green.500",
+        });
+
+        const userUpdated = user;
+        userUpdated.avatar = response.data.avatar;
+
+        await updateUserProfile(userUpdated);
       }
     } catch (error) {
       console.log("error ao selecionar imagem:", error);
@@ -180,7 +209,7 @@ const Profile: React.FC = () => {
             />
           ) : (
             <UserPhoto
-              source={{ uri: photoSelected }}
+              source={{ uri: `${api.defaults.baseURL}/avatar/${user?.avatar}` }}
               alt="Imagem do perfil"
               size={33}
             />
