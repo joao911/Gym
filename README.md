@@ -23,3 +23,6 @@ Um diferencial deste projeto foi a acessibilidade implementada nos inputs. Em um
 A próxima funcionalidade que pretendo implementar no projeto será a manipulação de estado global utilizando o Redux Rematch.
 
 Link do Figma: [Ignite Gym (Community)](https://www.figma.com/file/6nbRZUrIu3l4xqTlGiir1u/Ignite-Gym-(Community)?type=design&node-id=37-6&mode=design&t=LIKmIEg6gkPASfLb-0)
+</br>
+</br>
+![Screenshot from 2023-11-20 19-36-50](https://github.com/joao911/Gym/assets/49724031/4f3a7563-a351-4aa6-81fc-6cf4b1514108)
