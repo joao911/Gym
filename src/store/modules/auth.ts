@@ -2,27 +2,28 @@ import { createModel } from "@rematch/core";
 import { RootModel } from "../models";
 
 import { IState } from "./types";
+import { api } from "@services/api";
 
 export const auth = createModel<RootModel>()({
   state: {
-    userAge: 0,
+    loadingRegister: false,
   } as IState,
   reducers: {
-    setUserAge(state, payload: number) {
-      return { ...state, userAge: payload };
+    setLoadingRegister(state, payload: boolean) {
+      return { ...state, loadingRegister: payload };
     },
   },
   effects: (dispatch) => ({
-    async upAge(payload: string, state) {
-      console.log("payload", payload);
-      const { userAge } = state.users;
-      dispatch.users.setUserAge(userAge + 1);
-    },
-    async downAge(payload: string, state) {
-      console.log("payload", payload);
-      const { userAge } = state.users;
-      if (userAge >= 1) {
-        dispatch.users.setUserAge(userAge - 1);
+    async register(payload: { name: string; email: string; password: string }) {
+      try {
+        dispatch.auth.setLoadingRegister(true);
+        const response = await api.post("/users", payload);
+        dispatch.auth.setLoadingRegister(false);
+        console.log("response: ", response);
+      } catch (error) {
+        console.log("erro ao criar user: ", error);
+      } finally {
+        dispatch.auth.setLoadingRegister(false);
       }
     },
   }),

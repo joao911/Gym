@@ -2,8 +2,10 @@ import React, { useRef, useState } from "react";
 import { VStack, Image, Text, Center, Heading, ScrollView } from "native-base";
 import { useNavigation } from "@react-navigation/native";
 import { Controller, useForm } from "react-hook-form";
+import { useDispatch, useSelector } from "react-redux";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
+import { RootState, Dispatch } from "@store/index";
 
 import BackGround from "@assets/background.png";
 import Logo from "@assets/logo.svg";
@@ -20,6 +22,7 @@ interface IDataProps {
 const SignUp: React.FC = () => {
   const [showPassword, setShowPassword] = useState(true);
   const [showConfirmPassword, setShowConfirmPassword] = useState(true);
+  const dispatch = useDispatch<Dispatch>();
 
   const emailRef = useRef<any>(null);
   const passwordRef = useRef<any>(null);
@@ -51,8 +54,8 @@ const SignUp: React.FC = () => {
     resolver: yupResolver(schema),
   });
 
-  const onSubmit = (data: IDataProps) => {
-    console.log("data", data);
+  const onSubmit = ({ name, email, password }: IDataProps) => {
+    dispatch.auth.register({ name, email, password });
   };
   return (
     <ScrollView
@@ -118,10 +121,10 @@ const SignUp: React.FC = () => {
             control={control}
             render={({ field: { onChange, value } }) => (
               <Input
-                placeholder="Senha"
+                placeholder="Confirmar senha"
                 secureTextEntry
                 ref={passwordRef}
-                returnKeyType="done"
+                returnKeyType="next"
                 onSubmitEditing={confirmPasswordRef?.current?.focus()}
                 onChangeText={onChange}
                 value={value}
