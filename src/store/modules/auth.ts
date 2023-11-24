@@ -21,7 +21,7 @@ export const auth = createModel<RootModel>()({
         dispatch.auth.setLoadingRegister(false);
         console.log("response: ", response);
       } catch (error) {
-        console.log("erro ao criar user: ", error);
+        throw error;
       } finally {
         dispatch.auth.setLoadingRegister(false);
       }

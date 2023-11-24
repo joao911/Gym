@@ -122,10 +122,12 @@ const SignUp: React.FC = () => {
             render={({ field: { onChange, value } }) => (
               <Input
                 placeholder="Confirmar senha"
-                secureTextEntry
+                secureTextEntry={showPassword}
                 ref={passwordRef}
+                onSubmitEditing={() => {
+                  confirmPasswordRef?.current?.focus();
+                }}
                 returnKeyType="next"
-                onSubmitEditing={confirmPasswordRef?.current?.focus()}
                 onChangeText={onChange}
                 value={value}
                 errorMessage={errors.password?.message}
@@ -142,7 +144,7 @@ const SignUp: React.FC = () => {
             render={({ field: { onChange, value } }) => (
               <Input
                 placeholder="Confirmar senha"
-                secureTextEntry
+                secureTextEntry={showConfirmPassword}
                 ref={confirmPasswordRef}
                 returnKeyType="done"
                 onSubmitEditing={handleSubmit(onSubmit)}
