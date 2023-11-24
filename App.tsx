@@ -1,10 +1,5 @@
-import {
-  StyleSheet,
-  Text,
-  View,
-  ActivityIndicator,
-  StatusBar,
-} from "react-native";
+import { StatusBar } from "react-native";
+import { Provider } from "react-redux";
 import {
   useFonts,
   Roboto_400Regular,
@@ -15,6 +10,7 @@ import Loading from "@components/Loading";
 import SignIn from "@screens/SignIn";
 import SignUp from "@screens/SignUp";
 import { Routes } from "@routes/index";
+import { store } from "@store/index";
 
 export const THEME = extendTheme({
   colors: {
@@ -66,7 +62,9 @@ export default function App() {
         backgroundColor="transparent"
         translucent
       />
-      {fontsLoaded ? <Routes /> : <Loading />}
+      <Provider store={store}>
+        {fontsLoaded ? <Routes /> : <Loading />}
+      </Provider>
     </NativeBaseProvider>
   );
 }
