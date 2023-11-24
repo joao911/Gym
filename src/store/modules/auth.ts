@@ -3,7 +3,7 @@ import { RootModel } from "../models";
 
 import { IState } from "./types";
 
-export const users = createModel<RootModel>()({
+export const auth = createModel<RootModel>()({
   state: {
     userAge: 0,
   } as IState,
