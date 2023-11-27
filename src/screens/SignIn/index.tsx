@@ -1,8 +1,18 @@
 import React, { useRef, useState } from "react";
-import { VStack, Image, Text, Center, Heading, ScrollView } from "native-base";
+import {
+  VStack,
+  Image,
+  Text,
+  Center,
+  Heading,
+  ScrollView,
+  useToast,
+} from "native-base";
 import { Controller, useForm } from "react-hook-form";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
+import { useDispatch, useSelector } from "react-redux";
+import { RootState, Dispatch } from "@store/index";
 
 import BackGround from "@assets/background.png";
 import Logo from "@assets/logo.svg";
@@ -10,6 +20,7 @@ import Input from "@components/Input";
 import Button from "@components/Button";
 import { useNavigation } from "@react-navigation/native";
 import { AuthNavigationProps } from "@routes/auth.routes";
+import { AppError } from "@services/ultils/AppError";
 
 interface IDataProps {
   email: string;
@@ -17,6 +28,10 @@ interface IDataProps {
 }
 
 const SignIn: React.FC = () => {
+  const dispatch = useDispatch<Dispatch>();
+  const { loadingLogin } = useSelector((state: RootState) => state.auth);
+
+  const toast = useToast();
   const passwordRef = useRef<any>(null);
   const [showPassword, setShowPassword] = useState(true);
   const navigation = useNavigation<AuthNavigationProps>();
@@ -34,8 +49,21 @@ const SignIn: React.FC = () => {
     resolver: yupResolver(schema),
   });
 
-  const onSubmit = (data: IDataProps) => {
-    console.log("data", data);
+  const onSubmit = async (data: IDataProps) => {
+    try {
+      await dispatch.auth.login(data);
+    } catch (error) {
+      const isAppError = error instanceof AppError;
+
+      const title = isAppError
+        ? error.message
+        : "Não foi possivel entrar. Tente novamente mais tarde";
+      toast.show({
+        title,
+        placement: "top",
+        bgColor: "red.500",
+      });
+    }
   };
   return (
     <ScrollView
@@ -100,7 +128,11 @@ const SignIn: React.FC = () => {
             )}
           />
 
-          <Button title="Acessar" onPress={handleSubmit(onSubmit)} />
+          <Button
+            title="Acessar"
+            onPress={handleSubmit(onSubmit)}
+            isLoading={loadingLogin}
+          />
         </Center>
         <Center mt={24}>
           <Text color="gray.100" fontSize={"sm"} mb={3} fontFamily={"body"}>
