@@ -46,9 +46,8 @@ export const auth = createModel<RootModel>()({
     async register(payload: { name: string; email: string; password: string }) {
       try {
         dispatch.auth.setLoadingRegister(true);
-        const response = await api.post("/users", payload);
+        await api.post("/users", payload);
         dispatch.auth.setLoadingRegister(false);
-        console.log("response: ", response);
       } catch (error) {
         throw error;
       } finally {
@@ -91,9 +90,7 @@ export const auth = createModel<RootModel>()({
             "Content-Type": "multipart/form-data",
           },
         });
-
-        console.log("response: ", response.data);
-        dispatch.auth.setImagePhoto(response.data.avatar);
+        await dispatch.auth.setImagePhoto(response.data.avatar);
       } catch (error) {
         throw error;
       }

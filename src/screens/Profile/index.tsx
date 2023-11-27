@@ -22,6 +22,7 @@ import ForwardInput from "@components/Input";
 import Button from "@components/Button";
 import { AppError } from "@services/ultils/AppError";
 import { api } from "@services/api";
+import photoDefault from "@assets/userPhotoDefault.png";
 
 interface IDataProps {
   name: string;
@@ -35,9 +36,6 @@ const Profile: React.FC = () => {
   const { user, imagePhoto } = useSelector((state: RootState) => state.auth);
 
   const [photoIsLoading, setPhotoIsLoading] = useState(false);
-  const [photoSelected, setPhotoSelected] = useState(
-    "https://github.com/joao911.png"
-  );
   const [showOldPassword, setShowOldPassword] = useState(true);
   const [showNewPassword, setShowNewPassword] = useState(true);
   const [showConfirmPassword, setShowConfirmPassword] = useState(true);
@@ -81,8 +79,6 @@ const Profile: React.FC = () => {
         await dispatch.auth.updateProfileImage({
           avatar: photoFile,
         });
-
-        console.log("photoFile: ", photoFile);
 
         toast.show({
           title: "Foto alterada com sucesso",
@@ -140,7 +136,7 @@ const Profile: React.FC = () => {
         password: data.password,
         old_password: data.oldPassword,
       });
-      dispatch.auth.setUser({
+      await dispatch.auth.setUser({
         ...user,
         user: { ...user.user, name: data.name },
       });
@@ -163,7 +159,10 @@ const Profile: React.FC = () => {
   }, [watchName]);
 
   useEffect(() => {
-    console.log("imagePhoto: ", user?.user.avatar);
+    console.log(
+      "imagePhoto: ",
+      `${api.defaults.baseURL}/avatar/${user?.user.avatar}`
+    );
   }, [user?.user.avatar]);
 
   return (
@@ -181,9 +180,11 @@ const Profile: React.FC = () => {
             />
           ) : (
             <UserPhoto
-              source={{
-                uri: `${api.defaults.baseURL}/avatar/${user?.user.avatar}`,
-              }}
+              source={
+                imagePhoto
+                  ? { uri: `${api.defaults.baseURL}/avatar/${imagePhoto}` }
+                  : photoDefault
+              }
               alt="Imagem do perfil"
               size={33}
             />

@@ -58,7 +58,7 @@ export const home = createModel<RootModel>()({
         dispatch.home.setLoadingFetchingGroups(true);
         const response = await api.get(`/exercises/bygroup/${groupSelected}`);
         dispatch.home.setExercises(response.data);
-        console.log("response: ", response.data);
+
         dispatch.home.setLoadingFetchingGroups(false);
       } catch (error) {
         throw error;
