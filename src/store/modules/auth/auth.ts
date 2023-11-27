@@ -46,5 +46,21 @@ export const auth = createModel<RootModel>()({
         dispatch.auth.setLoadingLogin(false);
       }
     },
+    async handleUpdateProfile(payload: {
+      name: string;
+      password: string;
+      old_password: string;
+    }) {
+      try {
+        await api.put("/users", {
+          name: payload.name,
+          password: payload.password,
+          old_password: payload.old_password,
+        });
+      } catch (error) {
+        throw error;
+      }
+    },
+    async updateProfileImage(payload: any) {},
   }),
 });

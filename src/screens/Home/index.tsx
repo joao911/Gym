@@ -1,34 +1,42 @@
-import React, { useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { VStack, HStack, FlatList, Heading, Text } from "native-base";
+import { useSelector, useDispatch } from "react-redux";
+import { Dispatch, RootState } from "@store/index";
 
 import HomeHeader from "@components/HomeHeader";
 import Group from "@components/Group";
 import ExerciseCard from "@components/ExerciseCard";
-import { useNavigation } from "@react-navigation/native";
+import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import { AppNavigatorRoutesProps } from "@routes/app.routes";
+import Loading from "@components/Loading";
 
 const Home: React.FC = () => {
   const navigation = useNavigation<AppNavigatorRoutesProps>();
+  const dispatch = useDispatch<Dispatch>();
+  const { user } = useSelector((state: RootState) => state.auth);
+  const { groups, loadingFetchingGroups, exercises } = useSelector(
+    (state: RootState) => state.home
+  );
 
-  const [exercises, setExercises] = useState([
-    "Remada unilateral",
-    "Remada curvada",
-    "Remada unilateral",
-  ]);
-  const [groups, setGroups] = useState([
-    "Costas",
-    "Ombro",
-    "Bíceps",
-    "Tríceps",
-    "Peito",
-    "Antebraço",
-    "Panturrilha",
-  ]);
-  const [groupSelected, setGroupSelected] = useState("Costas");
+  const [groupSelected, setGroupSelected] = useState("costas");
 
-  const handleOpenExerciseDetails = () => {
-    navigation.navigate("Exercise");
+  const handleOpenExerciseDetails = (id: string) => {
+    navigation.navigate("Exercise", { exerciseId: id });
   };
+
+  const fetchExercisesByGroup = (groupSelected: string) => {
+    dispatch.home.fetchExercisesByGroup({ groupSelected });
+  };
+
+  useEffect(() => {
+    dispatch.home.fetchGroups({ token: user?.token });
+  }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      fetchExercisesByGroup(groupSelected);
+    }, [groupSelected])
+  );
 
   return (
     <VStack flex={1}>
@@ -60,16 +68,22 @@ const Home: React.FC = () => {
           </Heading>
           <Text color="gray.200">{exercises.length}</Text>
         </HStack>
-
-        <FlatList
-          data={exercises}
-          keyExtractor={(item) => item}
-          renderItem={({ item }) => (
-            <ExerciseCard name={item} onPress={handleOpenExerciseDetails} />
-          )}
-          showsVerticalScrollIndicator={false}
-          _contentContainerStyle={{ paddingBottom: 20 }}
-        />
+        {loadingFetchingGroups ? (
+          <Loading />
+        ) : (
+          <FlatList
+            data={exercises}
+            keyExtractor={(item) => item.id}
+            renderItem={({ item }) => (
+              <ExerciseCard
+                item={item}
+                onPress={() => handleOpenExerciseDetails(item.id)}
+              />
+            )}
+            showsVerticalScrollIndicator={false}
+            _contentContainerStyle={{ paddingBottom: 20 }}
+          />
+        )}
       </VStack>
     </VStack>
   );

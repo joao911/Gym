@@ -1,9 +1,15 @@
-import React, { useState } from "react";
+import React, { useCallback, useState } from "react";
 import { Heading, VStack, SectionList, Text } from "native-base";
+import { useDispatch, useSelector } from "react-redux";
+import { Dispatch, RootState } from "@store/index";
+
 import ScreenHeader from "@components/ScreenHeader";
 import HistoryCard from "@components/HistoryCard";
+import { useFocusEffect } from "@react-navigation/native";
 
 const History: React.FC = () => {
+  const dispatch = useDispatch<Dispatch>();
+  const { history } = useSelector((state: RootState) => state.home);
   const [exercises, setExercises] = useState([
     {
       title: "25.12.2024",
@@ -11,13 +17,23 @@ const History: React.FC = () => {
     },
   ]);
 
+  const fetchExerciseDetails = () => {
+    dispatch.home.getAllHistory();
+  };
+
+  useFocusEffect(
+    useCallback(() => {
+      fetchExerciseDetails();
+    }, [])
+  );
+
   return (
     <VStack flex={1}>
       <ScreenHeader title="Histórico de exercícios" />
       <SectionList
-        sections={exercises}
-        keyExtractor={(item) => item}
-        renderItem={({ item }) => <HistoryCard />}
+        sections={history}
+        keyExtractor={(item) => item.id}
+        renderItem={({ item }) => <HistoryCard item={item} />}
         renderSectionHeader={({ section }) => (
           <Heading
             color="gray.200"

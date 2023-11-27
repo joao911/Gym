@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { TouchableOpacity } from "react-native";
 import ScreenHeader from "@components/ScreenHeader";
 import {
@@ -8,16 +8,19 @@ import {
   Skeleton,
   Text,
   Heading,
+  useToast,
 } from "native-base";
 import * as ImagePicker from "expo-image-picker";
 import * as FileSystem from "expo-file-system";
 import { Controller, useForm } from "react-hook-form";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
-
+import { useDispatch, useSelector } from "react-redux";
+import { Dispatch, RootState } from "@store/index";
 import UserPhoto from "@components/UserPhoto";
 import ForwardInput from "@components/Input";
 import Button from "@components/Button";
+import { AppError } from "@services/ultils/AppError";
 
 interface IDataProps {
   name: string;
@@ -26,6 +29,10 @@ interface IDataProps {
   confirmPassword: string;
 }
 const Profile: React.FC = () => {
+  const dispatch = useDispatch<Dispatch>();
+  const toast = useToast();
+  const { user } = useSelector((state: RootState) => state.auth);
+
   const [photoIsLoading, setPhotoIsLoading] = useState(false);
   const [photoSelected, setPhotoSelected] = useState(
     "https://github.com/joao911.png"
@@ -33,13 +40,14 @@ const Profile: React.FC = () => {
   const [showOldPassword, setShowOldPassword] = useState(true);
   const [showNewPassword, setShowNewPassword] = useState(true);
   const [showConfirmPassword, setShowConfirmPassword] = useState(true);
+  const [userName, setUserName] = useState("");
 
   const passwordRef = useRef<any>(null);
   const oldPasswordRef = useRef<any>(null);
   const confirmPasswordRef = useRef<any>(null);
   const PHOTO_SIZE = 33;
 
-  const handleUserSelectPhot = async () => {
+  const handleUserSelectPhoto = async () => {
     try {
       setPhotoIsLoading(true);
       const photoSelected = await ImagePicker.launchImageLibraryAsync({
@@ -85,14 +93,46 @@ const Profile: React.FC = () => {
   const {
     control,
     handleSubmit,
+    reset,
+    watch,
     formState: { errors },
   } = useForm<IDataProps>({
     resolver: yupResolver(schema),
+    defaultValues: {
+      name: userName.length > 0 ? userName : user.user.name,
+    },
   });
 
-  const onSubmit = (data: IDataProps) => {
-    console.log("data", data);
+  const watchName = watch("name", "");
+
+  const onSubmit = async (data: IDataProps) => {
+    try {
+      await dispatch.auth.handleUpdateProfile({
+        name: data.name,
+        password: data.password,
+        old_password: data.oldPassword,
+      });
+      dispatch.auth.setUser({
+        ...user,
+        user: { ...user.user, name: data.name },
+      });
+      reset();
+    } catch (error) {
+      const isAppError = error instanceof AppError;
+      const title = isAppError
+        ? error.message
+        : "Não foi possível atualizar o perfil. Tente mais tarde";
+      toast.show({
+        title,
+        placement: "top",
+        bgColor: "red.500",
+      });
+    }
   };
+
+  useEffect(() => {
+    setUserName(watchName);
+  }, [watchName]);
 
   return (
     <VStack flex={1}>
@@ -114,7 +154,7 @@ const Profile: React.FC = () => {
               size={33}
             />
           )}
-          <TouchableOpacity onPress={handleUserSelectPhot}>
+          <TouchableOpacity onPress={handleUserSelectPhoto}>
             <Text
               color="green.500"
               fontWeight="bold"
@@ -148,7 +188,7 @@ const Profile: React.FC = () => {
             bg="gray.600"
             placeholder="e-mail"
             isDisabled
-            value="y7BzK@example.com"
+            value={user.user.email}
           />
         </Center>
         <VStack mt={12} mb={9} px={10}>
