@@ -21,6 +21,7 @@ import UserPhoto from "@components/UserPhoto";
 import ForwardInput from "@components/Input";
 import Button from "@components/Button";
 import { AppError } from "@services/ultils/AppError";
+import { api } from "@services/api";
 
 interface IDataProps {
   name: string;
@@ -64,8 +65,71 @@ const Profile: React.FC = () => {
         const photoInfo = await FileSystem.getInfoAsync(
           photoSelected.assets[0].uri
         );
-        console.log("photoInfo: ", photoInfo.size / 1024 / 1024 > 5);
+
         setPhotoSelected(photoSelected.assets[0].uri);
+      }
+
+      await dispatch.auth.updateProfileImage({
+        avatar: photoSelected.assets[0].uri,
+      });
+    } catch (error) {
+      console.log("error ao selecionar imagem:", error);
+    } finally {
+      setPhotoIsLoading(false);
+    }
+  };
+
+  const handleUserSelectPhot = async () => {
+    try {
+      setPhotoIsLoading(true);
+      const photoSelected = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        quality: 1,
+        aspect: [4, 4],
+        allowsEditing: true,
+      });
+
+      if (photoSelected.canceled) {
+        return;
+      }
+      if (photoSelected.assets[0].uri) {
+        const photoInfo = await FileSystem.getInfoAsync(
+          photoSelected.assets[0].uri
+        );
+
+        const fileExtension = photoInfo.uri.split(".").pop();
+        const photoFile = {
+          name: `${user.user.name}.${fileExtension}`
+            .toLowerCase()
+            .split(" ")
+            .join(""),
+          uri: photoSelected.assets[0].uri,
+          type: `${photoSelected.assets[0].type}/${fileExtension}`,
+        } as any;
+
+        const userPhotoUploadPhoto = new FormData();
+        userPhotoUploadPhoto.append("avatar", photoFile);
+
+        const response = await api.patch(
+          "/users/avatar",
+          userPhotoUploadPhoto,
+          {
+            headers: {
+              "Content-Type": "multipart/form-data",
+            },
+          }
+        );
+
+        toast.show({
+          title: "Foto alterada com sucesso",
+          placement: "top",
+          bgColor: "green.500",
+        });
+
+        // const userUpdated = user;
+        // userUpdated.avatar = response.data.avatar;
+
+        // await updateUserProfile(userUpdated);
       }
     } catch (error) {
       console.log("error ao selecionar imagem:", error);
@@ -73,6 +137,10 @@ const Profile: React.FC = () => {
       setPhotoIsLoading(false);
     }
   };
+
+  useEffect(() => {
+    console.log("photoSelected: ", photoSelected);
+  }, [photoSelected]);
 
   const schema = yup.object({
     name: yup.string().required("Nome é obrigatório"),

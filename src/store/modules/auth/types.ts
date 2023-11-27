@@ -16,3 +16,7 @@ export interface IUser {
     updated_at: Date;
   };
 }
+
+export interface ImageAvatar {
+  avatar: any;
+}
