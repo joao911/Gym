@@ -26,6 +26,7 @@ export const auth = createModel<RootModel>()({
     loadingRegister: false,
     loadingLogin: false,
     user: {},
+    imagePhoto: "",
   } as IState,
   reducers: {
     setLoadingRegister(state, payload: boolean) {
@@ -36,6 +37,9 @@ export const auth = createModel<RootModel>()({
     },
     setUser(state, payload: IUser) {
       return { ...state, user: payload };
+    },
+    setImagePhoto(state, payload: string) {
+      return { ...state, imagePhoto: payload };
     },
   },
   effects: (dispatch) => ({
@@ -81,7 +85,7 @@ export const auth = createModel<RootModel>()({
     async updateProfileImage(payload: ImageAvatar) {
       try {
         const formData = new FormData();
-        formData.append("avatar", getImageProps(payload.avatar) as any);
+        formData.append("avatar", payload.avatar as any);
         const response = await api.patch("/users/avatar", formData, {
           headers: {
             "Content-Type": "multipart/form-data",
@@ -89,6 +93,7 @@ export const auth = createModel<RootModel>()({
         });
 
         console.log("response: ", response.data);
+        dispatch.auth.setImagePhoto(response.data.avatar);
       } catch (error) {
         throw error;
       }

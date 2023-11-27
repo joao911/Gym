@@ -2,6 +2,7 @@ export interface IState {
   loadingRegister: boolean;
   loadingLogin: boolean;
   user: IUser;
+  imagePhoto: string;
 }
 
 export interface IUser {

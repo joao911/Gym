@@ -32,7 +32,7 @@ interface IDataProps {
 const Profile: React.FC = () => {
   const dispatch = useDispatch<Dispatch>();
   const toast = useToast();
-  const { user } = useSelector((state: RootState) => state.auth);
+  const { user, imagePhoto } = useSelector((state: RootState) => state.auth);
 
   const [photoIsLoading, setPhotoIsLoading] = useState(false);
   const [photoSelected, setPhotoSelected] = useState(
@@ -66,37 +66,6 @@ const Profile: React.FC = () => {
           photoSelected.assets[0].uri
         );
 
-        setPhotoSelected(photoSelected.assets[0].uri);
-      }
-
-      await dispatch.auth.updateProfileImage({
-        avatar: photoSelected.assets[0].uri,
-      });
-    } catch (error) {
-      console.log("error ao selecionar imagem:", error);
-    } finally {
-      setPhotoIsLoading(false);
-    }
-  };
-
-  const handleUserSelectPhot = async () => {
-    try {
-      setPhotoIsLoading(true);
-      const photoSelected = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
-        quality: 1,
-        aspect: [4, 4],
-        allowsEditing: true,
-      });
-
-      if (photoSelected.canceled) {
-        return;
-      }
-      if (photoSelected.assets[0].uri) {
-        const photoInfo = await FileSystem.getInfoAsync(
-          photoSelected.assets[0].uri
-        );
-
         const fileExtension = photoInfo.uri.split(".").pop();
         const photoFile = {
           name: `${user.user.name}.${fileExtension}`
@@ -109,16 +78,11 @@ const Profile: React.FC = () => {
 
         const userPhotoUploadPhoto = new FormData();
         userPhotoUploadPhoto.append("avatar", photoFile);
+        await dispatch.auth.updateProfileImage({
+          avatar: photoFile,
+        });
 
-        const response = await api.patch(
-          "/users/avatar",
-          userPhotoUploadPhoto,
-          {
-            headers: {
-              "Content-Type": "multipart/form-data",
-            },
-          }
-        );
+        console.log("photoFile: ", photoFile);
 
         toast.show({
           title: "Foto alterada com sucesso",
@@ -126,10 +90,10 @@ const Profile: React.FC = () => {
           bgColor: "green.500",
         });
 
-        // const userUpdated = user;
-        // userUpdated.avatar = response.data.avatar;
-
-        // await updateUserProfile(userUpdated);
+        await dispatch.auth.setUser({
+          ...user,
+          user: { ...user.user, avatar: imagePhoto },
+        });
       }
     } catch (error) {
       console.log("error ao selecionar imagem:", error);
@@ -137,10 +101,6 @@ const Profile: React.FC = () => {
       setPhotoIsLoading(false);
     }
   };
-
-  useEffect(() => {
-    console.log("photoSelected: ", photoSelected);
-  }, [photoSelected]);
 
   const schema = yup.object({
     name: yup.string().required("Nome é obrigatório"),
@@ -202,6 +162,10 @@ const Profile: React.FC = () => {
     setUserName(watchName);
   }, [watchName]);
 
+  useEffect(() => {
+    console.log("imagePhoto: ", user?.user.avatar);
+  }, [user?.user.avatar]);
+
   return (
     <VStack flex={1}>
       <ScreenHeader title="Perfil" />
@@ -217,7 +181,9 @@ const Profile: React.FC = () => {
             />
           ) : (
             <UserPhoto
-              source={{ uri: photoSelected }}
+              source={{
+                uri: `${api.defaults.baseURL}/avatar/${user?.user.avatar}`,
+              }}
               alt="Imagem do perfil"
               size={33}
             />
