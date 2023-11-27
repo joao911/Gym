@@ -1,5 +1,5 @@
 import { createModel } from "@rematch/core";
-import { RootModel } from "../models";
+import { RootModel } from "../../models";
 
 import { IState, IUser } from "./types";
 import { api } from "@services/api";

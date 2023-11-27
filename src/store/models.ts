@@ -1,5 +1,5 @@
 import { Models } from "@rematch/core";
-import { auth } from "./modules/auth";
+import { auth } from "./modules/auth/auth";
 
 export interface RootModel extends Models<RootModel> {
   auth: typeof auth;

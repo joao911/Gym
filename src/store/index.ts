@@ -8,7 +8,7 @@ import { models, RootModel } from "./models";
 const persistConfig = {
   key: "persist-storage",
   storage: AsyncStorage,
-  whitelist: ["login"],
+  whitelist: ["auth"],
   version: 2,
 };
 
