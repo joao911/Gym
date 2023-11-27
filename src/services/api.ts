@@ -1,9 +1,9 @@
+import axios from "axios";
+import { AppError } from "./ultils/AppError";
+
 const api = axios.create({
   baseURL: "http://172.17.0.1:3333",
 });
-
-import axios from "axios";
-import { AppError } from "./ultils/AppError";
 
 api.interceptors.response.use(
   (response) => response,
